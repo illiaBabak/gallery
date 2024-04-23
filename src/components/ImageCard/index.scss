@@ -1,0 +1,44 @@
+.image-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 420px;
+  height: 500px;
+  padding: 8px;
+  border: 6px solid #3e8ede;
+  border-radius: 2px;
+  text-align: center;
+
+  .image-icon {
+    width: 100%;
+    height: 290px;
+    object-fit: contain;
+  }
+
+  .created-text,
+  .likes-text,
+  .username {
+    font-size: 14px;
+  }
+
+  .image-user-info {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 190px;
+
+    .user-icon {
+      width: 35px;
+      height: 35px;
+      object-fit: contain;
+      border: 3px solid #3e8ede;
+      border-radius: 50%;
+    }
+
+    .username {
+      margin-left: 8px;
+    }
+  }
+}

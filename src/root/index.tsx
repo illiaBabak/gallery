@@ -1,3 +1,11 @@
+import { Header } from 'src/components/Header';
+import { ImagesList } from 'src/components/ImagesList';
+
 export const App = (): JSX.Element => {
-  return <></>;
+  return (
+    <div className='container'>
+      <Header />
+      <ImagesList />
+    </div>
+  );
 };
