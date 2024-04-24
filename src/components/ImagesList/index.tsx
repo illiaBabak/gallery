@@ -1,11 +1,8 @@
 import { useInfinitePhotos } from 'src/api/photos';
 import { ImageCard } from '../ImageCard';
-import { useRef } from 'react';
+import { useContext, useRef } from 'react';
 import { Loader } from '../Loader';
-
-type Props = {
-  searchQuery: string;
-};
+import { GlobalContext } from 'src/root';
 
 const OBSERVER_OPTIONS = {
   root: null,
@@ -13,7 +10,8 @@ const OBSERVER_OPTIONS = {
   threshold: 1,
 };
 
-export const ImagesList = ({ searchQuery }: Props): JSX.Element => {
+export const ImagesList = (): JSX.Element => {
+  const { searchQuery } = useContext(GlobalContext);
   const observer = useRef<IntersectionObserver | null>(null);
   const { data, isFetchingNextPage, fetchNextPage, isLoading } = useInfinitePhotos(searchQuery);
   const images = data?.pages.flatMap((el) => el.images) ?? [];
