@@ -16,3 +16,7 @@ export type ImageUser = {
     medium: string;
   };
 };
+
+export type SearchImages = {
+  results: ImageType[];
+};

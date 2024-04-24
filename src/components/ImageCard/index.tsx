@@ -5,7 +5,7 @@ import { parseDate } from 'src/utils/parseDate';
 export const ImageCard = ({ image }: { image: ImageType }): JSX.Element => {
   return (
     <div className='image-card'>
-      <h3>{capitalize(image.alt_description)}</h3>
+      <h3 className='image-title'>{capitalize(image.alt_description)}</h3>
       <img className='image-icon' src={image.urls.regular} alt={image.alt_description} />
       <p className='created-text'>Created at: {parseDate(image.created_at)}</p>
       <p className='likes-text'>Likes: {image.likes}</p>

@@ -1,4 +1,4 @@
-import { ImageType, ImageUrl, ImageUser } from 'src/types/types';
+import { ImageType, ImageUrl, ImageUser, SearchImages } from 'src/types/types';
 
 const isObj = (data: unknown): data is object => !!data && typeof data === 'object';
 
@@ -40,4 +40,8 @@ export const isImage = (data: unknown): data is ImageType => {
 
 export const isImageArr = (data: unknown): data is ImageType[] => {
   return Array.isArray(data) && data.every((el) => isImage(el));
+};
+
+export const isImageSearchArr = (data: unknown): data is SearchImages => {
+  return isObj(data) && 'results' in data && isImageArr(data.results);
 };

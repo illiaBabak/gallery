@@ -3,15 +3,19 @@ import { ImageCard } from '../ImageCard';
 import { useRef } from 'react';
 import { Loader } from '../Loader';
 
+type Props = {
+  searchQuery: string;
+};
+
 const OBSERVER_OPTIONS = {
   root: null,
   rootMargin: '0px',
   threshold: 1,
 };
 
-export const ImagesList = (): JSX.Element => {
+export const ImagesList = ({ searchQuery }: Props): JSX.Element => {
   const observer = useRef<IntersectionObserver | null>(null);
-  const { data, isFetchingNextPage, fetchNextPage } = useInfinitePhotos();
+  const { data, isFetchingNextPage, fetchNextPage, isLoading } = useInfinitePhotos(searchQuery);
   const images = data?.pages.flatMap((el) => el.images) ?? [];
 
   const handleIntersect = (el: HTMLElement | null) => {
@@ -30,7 +34,7 @@ export const ImagesList = (): JSX.Element => {
         {images?.map((image, index) => <ImageCard image={image} key={`image-card-${image.created_at}-${index}`} />)}
       </div>
 
-      {isFetchingNextPage ? <Loader /> : <div ref={handleIntersect} />}
+      {isFetchingNextPage || isLoading ? <Loader /> : <div ref={handleIntersect} />}
     </>
   );
 };

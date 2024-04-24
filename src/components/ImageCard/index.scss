@@ -9,6 +9,11 @@
   border: 6px solid #3e8ede;
   border-radius: 2px;
   text-align: center;
+  cursor: pointer;
+
+  .image-title {
+    color: #3e8ede;
+  }
 
   .image-icon {
     width: 100%;
@@ -40,5 +45,11 @@
     .username {
       margin-left: 8px;
     }
+  }
+
+  &:hover {
+    transform: scale(1.02);
+    transition: 0.25s;
+    border: 6px solid #1c67b3;
   }
 }
