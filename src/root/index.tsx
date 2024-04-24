@@ -8,6 +8,8 @@ type GlobalContextType = {
   setShouldShowCarousel: React.Dispatch<React.SetStateAction<boolean>>;
   searchQuery: string;
   setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  lastClickedElIndex: number;
+  setLastClickedElIndex: React.Dispatch<React.SetStateAction<number>>;
 };
 
 export const GlobalContext = createContext<GlobalContextType>({
@@ -19,14 +21,28 @@ export const GlobalContext = createContext<GlobalContextType>({
   setSearchQuery: () => {
     throw new Error('Global context is not initialized');
   },
+  lastClickedElIndex: 0,
+  setLastClickedElIndex: () => {
+    throw new Error('Global context is not initialized');
+  },
 });
 
 export const App = (): JSX.Element => {
   const [shouldShowCarousel, setShouldShowCarousel] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [lastClickedElIndex, setLastClickedElIndex] = useState(0);
 
   return (
-    <GlobalContext.Provider value={{ searchQuery, setSearchQuery, setShouldShowCarousel, shouldShowCarousel }}>
+    <GlobalContext.Provider
+      value={{
+        setLastClickedElIndex,
+        lastClickedElIndex,
+        searchQuery,
+        setSearchQuery,
+        setShouldShowCarousel,
+        shouldShowCarousel,
+      }}
+    >
       <div className='container'>
         <Header />
         {shouldShowCarousel ? <Carousel /> : <ImagesList />}

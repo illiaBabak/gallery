@@ -7,11 +7,11 @@ import { Loader } from '../Loader';
 const SCROLL_STEP = 100;
 
 export const Carousel = (): JSX.Element => {
-  const { searchQuery, setShouldShowCarousel } = useContext(GlobalContext);
+  const { searchQuery, setShouldShowCarousel, lastClickedElIndex } = useContext(GlobalContext);
   const { data, isLoading } = useInfinitePhotos(searchQuery);
   const images = data?.pages.flatMap((el) => el.images) ?? [];
 
-  const [scrollPosition, setScrollPosition] = useState(0);
+  const [scrollPosition, setScrollPosition] = useState(lastClickedElIndex * SCROLL_STEP);
 
   const handlePrevClick = () => {
     setScrollPosition((prevPosition) => prevPosition - SCROLL_STEP);
