@@ -9,6 +9,8 @@
     width: 100vw;
     height: 95%;
     margin: 0;
+    user-select: none;
+    pointer-events: none;
     object-fit: contain;
   }
 }

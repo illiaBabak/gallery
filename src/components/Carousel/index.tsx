@@ -3,15 +3,42 @@ import { CarouselCard } from '../CarouselCard';
 import { useContext, useState } from 'react';
 import { GlobalContext } from 'src/root';
 import { Loader } from '../Loader';
+import { useSwipeable } from 'react-swipeable';
 
 const SCROLL_STEP = 100;
+
+const SWIPE_OPTIONS = {
+  delta: 10,
+  preventScrollOnSwipe: false,
+  trackTouch: true,
+  trackMouse: true,
+  rotationAngle: 0,
+  swipeDuration: Infinity,
+  touchEventOptions: { passive: true },
+};
 
 export const Carousel = (): JSX.Element => {
   const { searchQuery, setShouldShowCarousel, lastClickedElIndex } = useContext(GlobalContext);
   const { data, isLoading } = useInfinitePhotos(searchQuery);
+  const [scrollPosition, setScrollPosition] = useState(lastClickedElIndex * SCROLL_STEP);
   const images = data?.pages.flatMap((el) => el.images) ?? [];
 
-  const [scrollPosition, setScrollPosition] = useState(lastClickedElIndex * SCROLL_STEP);
+  const prevDisabled = scrollPosition === 0;
+  const nextDisabled = scrollPosition === (images.length - 1) * SCROLL_STEP;
+
+  const handlers = useSwipeable({
+    onSwipedLeft: () => {
+      if (nextDisabled) return;
+
+      handleNextClick();
+    },
+    onSwipedRight: () => {
+      if (prevDisabled) return;
+
+      handlePrevClick();
+    },
+    ...SWIPE_OPTIONS,
+  });
 
   const handlePrevClick = () => {
     setScrollPosition((prevPosition) => prevPosition - SCROLL_STEP);
@@ -26,7 +53,7 @@ export const Carousel = (): JSX.Element => {
       {isLoading && <Loader />}
 
       <div className='carousel-wrapper'>
-        <div className='carousel' style={{ transform: `translateX(-${scrollPosition}%)` }}>
+        <div className='carousel' {...handlers} style={{ transform: `translateX(-${scrollPosition}%)` }}>
           {images?.map((image, index) => (
             <CarouselCard imageUrl={image.urls.regular} key={`image-card-${image.created_at}-${index}`} />
           ))}
@@ -34,14 +61,14 @@ export const Carousel = (): JSX.Element => {
 
         <div className='container-btn'>
           <div
-            className={`btn ${scrollPosition === 0 ? 'disabled-btn' : ''}`}
-            onClick={scrollPosition === 0 ? () => {} : () => handlePrevClick()}
+            className={`btn ${prevDisabled && 'disabled-btn'}`}
+            onClick={prevDisabled ? () => {} : () => handlePrevClick()}
           >
             Prev
           </div>
           <div
-            className={`btn ${scrollPosition === (images.length - 1) * SCROLL_STEP ? 'disabled-btn' : ''}`}
-            onClick={scrollPosition === (images.length - 1) * SCROLL_STEP ? () => {} : () => handleNextClick()}
+            className={`btn ${nextDisabled && 'disabled-btn'}`}
+            onClick={nextDisabled ? () => {} : () => handleNextClick()}
           >
             Next
           </div>
