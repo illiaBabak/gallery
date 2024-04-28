@@ -14,7 +14,7 @@ export const ImagesList = (): JSX.Element => {
   const { searchQuery } = useContext(GlobalContext);
   const observer = useRef<IntersectionObserver | null>(null);
   const { data, isFetchingNextPage, fetchNextPage, isLoading } = useInfinitePhotos(searchQuery);
-  const images = data?.pages.flatMap((el) => el.images) ?? [];
+  const images = data?.pages.flatMap((el) => el.images);
 
   const handleIntersect = (el: HTMLElement | null) => {
     observer.current = new IntersectionObserver((entries) => {

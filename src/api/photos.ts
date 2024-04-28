@@ -18,7 +18,7 @@ const getPhotos = async (
 
     if (query && isImageSearchArr(responseData)) return { images: responseData.results, pageNumber };
 
-    if (isImageArr(responseData)) return { images: responseData, pageNumber };
+    return { images: isImageArr(responseData) ? responseData : [], pageNumber };
   } catch {
     throw new Error('Something went wrong with request (photos)');
   }

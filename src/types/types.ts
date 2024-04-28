@@ -1,5 +1,5 @@
 export type ImageType = {
-  alt_description: string;
+  alt_description: string | null;
   created_at: string;
   likes: number;
   urls: ImageUrl;

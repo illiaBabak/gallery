@@ -30,7 +30,7 @@ export const isImage = (data: unknown): data is ImageType => {
     'likes' in data &&
     'urls' in data &&
     'user' in data &&
-    isString(data.alt_description) &&
+    (isString(data.alt_description) || data.alt_description === null) &&
     isString(data.created_at) &&
     isNumber(data.likes) &&
     isImageUrl(data.urls) &&
