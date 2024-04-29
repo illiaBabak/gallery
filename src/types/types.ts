@@ -20,3 +20,5 @@ export type ImageUser = {
 export type SearchImages = {
   results: ImageType[];
 };
+
+export type Note = { x: number; y: number; text: string };
