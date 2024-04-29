@@ -2,15 +2,24 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100vw;
+  min-width: 100vw;
+  max-width: 100vw;
   height: 95%;
 
-  .carousel-img {
-    width: 100vw;
-    height: 95%;
-    margin: 0;
-    user-select: none;
-    pointer-events: none;
-    object-fit: contain;
+  .img-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+
+    .carousel-img {
+      width: 100%;
+      height: 70vh;
+      margin: 0;
+      user-select: none;
+      pointer-events: none;
+      object-fit: contain;
+    }
   }
 }
