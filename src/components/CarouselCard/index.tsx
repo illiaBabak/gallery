@@ -1,14 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PrismaZoom from 'react-prismazoom';
 import { Note } from 'src/types/types';
+import { getStorageNotes } from 'src/utils/getStorageNotes';
 
 type Props = {
+  imageId: string;
   imageUrl: string;
 };
 
-export const CarouselCard = ({ imageUrl }: Props): JSX.Element => {
+export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
   const [inputs, setInputs] = useState<Note[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  useEffect(() => {
+    const storageData = getStorageNotes();
+    const defaultData = storageData.find((note) => note.id === imageId)?.notes ?? [];
+
+    setInputs(defaultData);
+  }, [imageId, setInputs]);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const x = e.nativeEvent.offsetX;
@@ -27,6 +36,14 @@ export const CarouselCard = ({ imageUrl }: Props): JSX.Element => {
     setInputs((prevInputs) =>
       prevInputs.map((input, i) => (i === index ? { ...input, text: input.text.trim() } : input))
     );
+
+    const prevNotes = getStorageNotes();
+    const newNote = { id: imageId, notes: inputs };
+    const existImg = prevNotes.find((el) => el.id === imageId);
+
+    const updatedNotes = prevNotes.map((note) => (note.id === imageId ? { ...note, notes: inputs } : note));
+
+    localStorage.setItem('notes', JSON.stringify(existImg ? updatedNotes : [...prevNotes, newNote]));
   };
 
   return (
@@ -51,6 +68,9 @@ export const CarouselCard = ({ imageUrl }: Props): JSX.Element => {
                 value={el.text}
                 onChange={(e) => handleInputChange(e, index)}
                 onBlur={() => handleInputBlur(index)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') e.currentTarget.blur();
+                }}
                 onClick={() => {}}
                 autoFocus
               />

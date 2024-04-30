@@ -1,4 +1,5 @@
 export type ImageType = {
+  id: string;
   alt_description: string | null;
   created_at: string;
   likes: number;
@@ -22,3 +23,8 @@ export type SearchImages = {
 };
 
 export type Note = { x: number; y: number; text: string };
+
+export type StorageNotes = {
+  id: string;
+  notes: Note[];
+};

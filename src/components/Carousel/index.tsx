@@ -55,7 +55,11 @@ export const Carousel = (): JSX.Element => {
       <div className='carousel-wrapper'>
         <div className='carousel' {...handlers} style={{ transform: `translateX(-${scrollPosition}%)` }}>
           {images?.map((image, index) => (
-            <CarouselCard imageUrl={image.urls.regular} key={`image-card-${image.created_at}-${index}`} />
+            <CarouselCard
+              imageId={image.id}
+              imageUrl={image.urls.regular}
+              key={`image-card-${image.created_at}-${index}`}
+            />
           ))}
         </div>
 
