@@ -64,14 +64,16 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
                 className='note-input'
                 key={`input-${index}`}
                 type='text'
-                style={{ position: 'absolute', left: el.x, top: el.y }}
+                style={{ position: 'absolute', left: el.x, top: el.y + 15 }}
                 value={el.text}
                 onChange={(e) => handleInputChange(e, index)}
                 onBlur={() => handleInputBlur(index)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') e.currentTarget.blur();
                 }}
-                onClick={() => {}}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
                 autoFocus
               />
             ) : (
