@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import PrismaZoom from 'react-prismazoom';
 import { Note } from 'src/types/types';
 import { getStorageNotes } from 'src/utils/getStorageNotes';
@@ -11,6 +11,25 @@ type Props = {
 export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
   const [inputs, setInputs] = useState<Note[]>([]);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'd' && typeof focusedIndex === 'number') {
+        setInputs((prev) => prev.filter((_, index) => index !== focusedIndex));
+        setFocusedIndex(null);
+      }
+    },
+    [focusedIndex]
+  );
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
 
   useEffect(() => {
     const storageData = getStorageNotes();
@@ -34,7 +53,9 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
     setEditingIndex(null);
 
     setInputs((prevInputs) =>
-      prevInputs.map((input, i) => (i === index ? { ...input, text: input.text.trim() } : input))
+      prevInputs
+        .map((input, i) => (i === index ? { ...input, text: input.text.trim() } : input))
+        .filter((input) => input.text !== '')
     );
 
     const prevNotes = getStorageNotes();
@@ -54,7 +75,11 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
           minZoom={1}
           maxZoom={2}
           doubleTouchMaxDelay={0}
-          onClick={(e) => handleClick(e)}
+          onClick={(e) => {
+            if (focusedIndex) return;
+
+            handleClick(e);
+          }}
         >
           <img className='carousel-img' src={imageUrl} alt='carousel-image' />
 
@@ -64,7 +89,7 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
                 className='note-input'
                 key={`input-${index}`}
                 type='text'
-                style={{ position: 'absolute', left: el.x, top: el.y + 15 }}
+                style={{ position: 'absolute', left: el.x, top: el.y + 2 }}
                 value={el.text}
                 onChange={(e) => handleInputChange(e, index)}
                 onBlur={() => handleInputBlur(index)}
@@ -77,7 +102,13 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
                 autoFocus
               />
             ) : (
-              <p key={`text-${index}`} style={{ left: el.x, top: el.y }} className='note'>
+              <p
+                key={`text-${index}`}
+                style={{ left: el.x, top: el.y }}
+                className='note'
+                onMouseEnter={() => setFocusedIndex(index)}
+                onMouseLeave={() => setFocusedIndex(null)}
+              >
                 {el.text}
               </p>
             )
