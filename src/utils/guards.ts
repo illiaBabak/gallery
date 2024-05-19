@@ -51,12 +51,14 @@ export const isImageSearchArr = (data: unknown): data is SearchImages => {
 const isNote = (data: unknown): data is Note => {
   return (
     isObj(data) &&
+    'key' in data &&
     'x' in data &&
     'y' in data &&
     'text' in data &&
     isNumber(data.x) &&
     isNumber(data.y) &&
-    isString(data.text)
+    isString(data.text) &&
+    isString(data.key)
   );
 };
 

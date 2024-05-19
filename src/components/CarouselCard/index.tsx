@@ -20,9 +20,16 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
       if (e.key === 'd' && typeof focusedIndex === 'number') {
         setInputs((prev) => prev.filter((_, index) => index !== focusedIndex));
         setFocusedIndex(null);
+
+        const prevNotes = getStorageNotes();
+        const updatedNotes = prevNotes.map((note) =>
+          note.id === imageId ? { ...note, notes: inputs.filter((_, index) => index !== focusedIndex) } : note
+        );
+
+        localStorage.setItem('notes', JSON.stringify(updatedNotes));
       }
     },
-    [focusedIndex]
+    [focusedIndex, imageId, inputs]
   );
 
   useEffect(() => {
