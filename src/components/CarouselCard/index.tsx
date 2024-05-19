@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import PrismaZoom from 'react-prismazoom';
 import { Note } from 'src/types/types';
+import { generateKey } from 'src/utils/generateKey';
 import { getStorageNotes } from 'src/utils/getStorageNotes';
 
 type Props = {
@@ -10,8 +11,9 @@ type Props = {
 
 export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
   const [inputs, setInputs] = useState<Note[]>([]);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
+  const [newNote, setNewNote] = useState<Note | null>(null);
+  const [selectedInputKey, setSelectedInputKey] = useState('');
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -41,30 +43,35 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const x = e.nativeEvent.offsetX;
     const y = e.nativeEvent.offsetY;
+    const uniqueKey = generateKey();
 
-    setInputs([...inputs, { x, y, text: '' }]);
-    setEditingIndex(inputs.length);
+    setNewNote({ x, y, text: '', key: uniqueKey });
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, index: number) =>
-    setInputs((prevInputs) => prevInputs.map((input, i) => (i === index ? { ...input, text: e.target.value } : input)));
+  const handleAddNew = () => {
+    if (!newNote) return;
 
-  const handleInputBlur = (index: number) => {
-    setEditingIndex(null);
-
-    setInputs((prevInputs) =>
-      prevInputs
-        .map((input, i) => (i === index ? { ...input, text: input.text.trim() } : input))
-        .filter((input) => input.text !== '')
-    );
+    setInputs((prevInputs) => [...prevInputs, newNote]);
 
     const prevNotes = getStorageNotes();
-    const newNote = { id: imageId, notes: inputs };
-    const existImg = prevNotes.find((el) => el.id === imageId);
+    const newStorageNote = { id: imageId, notes: [...inputs, newNote] };
+    const isExistImg = !!prevNotes.find((el) => el.id === imageId);
+    const updatedNotes = prevNotes.map((note) =>
+      note.id === imageId ? { ...note, notes: [...inputs, newNote] } : note
+    );
 
+    localStorage.setItem('notes', JSON.stringify(isExistImg ? updatedNotes : [...prevNotes, newStorageNote]));
+
+    setNewNote(null);
+  };
+
+  const handleInputBlur = () => {
+    setSelectedInputKey('');
+
+    const prevNotes = getStorageNotes();
     const updatedNotes = prevNotes.map((note) => (note.id === imageId ? { ...note, notes: inputs } : note));
 
-    localStorage.setItem('notes', JSON.stringify(existImg ? updatedNotes : [...prevNotes, newNote]));
+    localStorage.setItem('notes', JSON.stringify(updatedNotes));
   };
 
   return (
@@ -76,24 +83,51 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
           maxZoom={2}
           doubleTouchMaxDelay={0}
           onClick={(e) => {
-            if (focusedIndex) return;
-
             handleClick(e);
           }}
         >
           <img className='carousel-img' src={imageUrl} alt='carousel-image' />
 
+          {newNote && (
+            <input
+              className='note-input'
+              key={`input-${newNote.key}`}
+              type='text'
+              style={{ position: 'absolute', left: newNote.x, top: newNote.y + 2 }}
+              value={newNote.text}
+              onChange={(e) => setNewNote((prev) => (prev ? { ...prev, text: e.currentTarget.value } : prev))}
+              onBlur={handleAddNew}
+              onKeyDown={(e) => {
+                setFocusedIndex(null);
+
+                if (e.key === 'Enter') e.currentTarget.blur();
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              autoFocus
+            />
+          )}
+
           {inputs.map((el, index) =>
-            editingIndex === index ? (
+            el.key === selectedInputKey ? (
               <input
                 className='note-input'
-                key={`input-${index}`}
+                key={`input-${el.key}`}
                 type='text'
                 style={{ position: 'absolute', left: el.x, top: el.y + 2 }}
                 value={el.text}
-                onChange={(e) => handleInputChange(e, index)}
-                onBlur={() => handleInputBlur(index)}
+                onChange={(e) => {
+                  const val = e.currentTarget.value;
+
+                  setInputs((prevInputs) =>
+                    prevInputs.map((input) => (input.key === el.key ? { ...input, text: val } : input))
+                  );
+                }}
+                onBlur={handleInputBlur}
                 onKeyDown={(e) => {
+                  setFocusedIndex(null);
+
                   if (e.key === 'Enter') e.currentTarget.blur();
                 }}
                 onClick={(e) => {
@@ -103,11 +137,14 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
               />
             ) : (
               <p
-                key={`text-${index}`}
+                key={`text-${el.key}`}
                 style={{ left: el.x, top: el.y }}
                 className='note'
                 onMouseEnter={() => setFocusedIndex(index)}
                 onMouseLeave={() => setFocusedIndex(null)}
+                onClick={() => {
+                  setSelectedInputKey(el.key);
+                }}
               >
                 {el.text}
               </p>

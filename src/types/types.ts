@@ -22,7 +22,7 @@ export type SearchImages = {
   results: ImageType[];
 };
 
-export type Note = { x: number; y: number; text: string };
+export type Note = { x: number; y: number; text: string; key: string };
 
 export type StorageNotes = {
   id: string;
