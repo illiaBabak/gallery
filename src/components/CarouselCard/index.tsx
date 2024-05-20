@@ -146,11 +146,16 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
               <p
                 key={`text-${el.key}`}
                 style={{ left: el.x, top: el.y }}
-                className='note'
-                onMouseEnter={() => setFocusedIndex(index)}
-                onMouseLeave={() => setFocusedIndex(null)}
-                onClick={() => {
-                  setSelectedInputKey(el.key);
+                className={`note ${focusedIndex === index ? 'focused' : ''}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+
+                  setFocusedIndex(index);
+
+                  if (index === focusedIndex) {
+                    setSelectedInputKey(el.key);
+                    setFocusedIndex(null);
+                  }
                 }}
               >
                 {el.text}
