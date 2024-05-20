@@ -1,20 +1,19 @@
-import { useContext } from 'react';
-import { GlobalContext } from 'src/root';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ImageType } from 'src/types/types';
 import { capitalize } from 'src/utils/capitalize';
 import { parseDate } from 'src/utils/parseDate';
 
 type Props = {
   image: ImageType;
-  index: number;
 };
 
-export const ImageCard = ({ image, index }: Props): JSX.Element => {
-  const { setShouldShowCarousel, setLastClickedElIndex } = useContext(GlobalContext);
+export const ImageCard = ({ image }: Props): JSX.Element => {
+  const [, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   const handleClick = () => {
-    setShouldShowCarousel(true);
-    setLastClickedElIndex(index);
+    setSearchParams({ id: image.id });
+    navigate(`/carousel?id=${image.id}`);
   };
 
   return (

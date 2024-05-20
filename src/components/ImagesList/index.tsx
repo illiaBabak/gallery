@@ -29,9 +29,7 @@ export const ImagesList = (): JSX.Element => {
   return (
     <>
       <div className='images-list'>
-        {images?.map((image, index) => (
-          <ImageCard index={index} image={image} key={`image-card-${image.created_at}-${index}`} />
-        ))}
+        {images?.map((image, index) => <ImageCard image={image} key={`image-card-${image.created_at}-${index}`} />)}
       </div>
 
       {isFetchingNextPage || isLoading ? <Loader /> : <div ref={handleIntersect} />}

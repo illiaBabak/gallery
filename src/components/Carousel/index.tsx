@@ -4,6 +4,7 @@ import { useContext, useState } from 'react';
 import { GlobalContext } from 'src/root';
 import { Loader } from '../Loader';
 import { useSwipeable } from 'react-swipeable';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const SCROLL_STEP = 100;
 
@@ -18,10 +19,17 @@ const SWIPE_OPTIONS = {
 };
 
 export const Carousel = (): JSX.Element => {
-  const { searchQuery, setShouldShowCarousel, lastClickedElIndex } = useContext(GlobalContext);
+  const { searchQuery } = useContext(GlobalContext);
+  const navigate = useNavigate();
+
   const { data, isLoading } = useInfinitePhotos(searchQuery);
-  const [scrollPosition, setScrollPosition] = useState(lastClickedElIndex * SCROLL_STEP);
   const images = data?.pages.flatMap((el) => el.images) ?? [];
+
+  const [searchParams] = useSearchParams();
+  const searchedId = searchParams.get('id');
+  const currentImageIndex = images.findIndex((el) => el.id === searchedId) ?? 0;
+
+  const [scrollPosition, setScrollPosition] = useState(currentImageIndex * SCROLL_STEP);
 
   const prevDisabled = scrollPosition === 0;
   const nextDisabled = scrollPosition === (images.length - 1) * SCROLL_STEP;
@@ -78,7 +86,7 @@ export const Carousel = (): JSX.Element => {
           </div>
         </div>
 
-        <div className='close-carousel-btn' onClick={() => setShouldShowCarousel(false)}>
+        <div className='close-carousel-btn' onClick={() => navigate('/images')}>
           x
         </div>
       </div>

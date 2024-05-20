@@ -56,11 +56,5 @@
       font-size: 32px;
       cursor: pointer;
     }
-
-    .disabled {
-      filter: grayscale(70%);
-      color: rgba(128, 128, 128, 0.271);
-      cursor: not-allowed;
-    }
   }
 }
