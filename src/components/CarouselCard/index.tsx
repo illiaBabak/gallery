@@ -20,25 +20,10 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
       if (e.key === 'd' && focusedKey) {
         setInputs((prev) => prev.filter((el) => el.key !== focusedKey));
         setFocusedKey('');
-
-        const prevNotes = getStorageNotes();
-        const updatedNotes = prevNotes.map((note) =>
-          note.id === imageId ? { ...note, notes: inputs.filter((el) => el.key !== focusedKey) } : note
-        );
-
-        localStorage.setItem('notes', JSON.stringify(updatedNotes));
       }
     },
-    [focusedKey, imageId, inputs]
+    [focusedKey]
   );
-
-  useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [handleKeyDown]);
 
   useEffect(() => {
     const storageData = getStorageNotes();
@@ -46,6 +31,27 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
 
     setInputs(defaultData);
   }, [imageId, setInputs]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown);
+
+    const timerId = setInterval(() => {
+      const prevNotes = getStorageNotes();
+
+      const isExistImg = !!prevNotes.find((el) => el.id === imageId);
+      const updatedNotes = prevNotes.map((note) => (note.id === imageId ? { ...note, notes: inputs } : note));
+
+      localStorage.setItem(
+        'notes',
+        JSON.stringify(isExistImg ? updatedNotes : [...prevNotes, { id: imageId, notes: inputs }])
+      );
+    }, 5000);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      clearInterval(timerId);
+    };
+  }, [handleKeyDown, inputs, imageId]);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     const x = e.nativeEvent.offsetX;
@@ -61,26 +67,10 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
 
     setInputs((prevInputs) => [...prevInputs, newNote]);
 
-    const prevNotes = getStorageNotes();
-    const newStorageNote = { id: imageId, notes: [...inputs, newNote] };
-    const isExistImg = !!prevNotes.find((el) => el.id === imageId);
-    const updatedNotes = prevNotes.map((note) =>
-      note.id === imageId ? { ...note, notes: [...inputs, newNote] } : note
-    );
-
-    localStorage.setItem('notes', JSON.stringify(isExistImg ? updatedNotes : [...prevNotes, newStorageNote]));
-
     setNewNote(null);
   };
 
-  const handleInputBlur = () => {
-    setSelectedInputKey('');
-
-    const prevNotes = getStorageNotes();
-    const updatedNotes = prevNotes.map((note) => (note.id === imageId ? { ...note, notes: inputs } : note));
-
-    localStorage.setItem('notes', JSON.stringify(updatedNotes));
-  };
+  const handleInputBlur = () => setSelectedInputKey('');
 
   return (
     <div className='carousel-card'>
