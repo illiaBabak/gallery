@@ -24,33 +24,40 @@
     flex-direction: row;
     align-items: center;
 
-    .btn {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 75px;
-      height: 25px;
-      border: 3px solid #3e8ede;
-      background-color: white;
-      border-radius: 2px;
-      margin: 8px;
-      padding: 4px;
-      color: #3e8ede;
-      cursor: pointer;
+    .nav-btn-wrapper {
+      .btn {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 75px;
+        height: 25px;
+        border: 3px solid #3e8ede;
+        background-color: white;
+        border-radius: 2px;
+        margin: 8px;
+        padding: 4px;
+        color: #3e8ede;
+        cursor: pointer;
 
-      &:hover {
-        transform: scale(1.05);
-        transition: 0.25s;
+        &:hover {
+          transform: scale(1.05);
+          transition: 0.25s;
+        }
       }
-    }
 
-    .disabled-btn {
-      filter: grayscale(70%);
-      cursor: not-allowed;
+      &.disabled-btn {
+        cursor: not-allowed;
 
-      &:hover {
-        transform: scale(1);
-        transition: 0;
+        .btn {
+          filter: grayscale(70%);
+          cursor: not-allowed;
+          pointer-events: none;
+
+          &:hover {
+            transform: scale(1);
+            transition: 0;
+          }
+        }
       }
     }
   }
