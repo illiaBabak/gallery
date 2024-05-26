@@ -9,6 +9,9 @@ type Props = {
   imageUrl: string;
 };
 
+const INPUT_WIDTH = 146;
+const INPUT_HEIGHT = 26;
+
 export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
   const [inputs, setInputs] = useState<Note[]>([]);
   const [focusedKey, setFocusedKey] = useState('');
@@ -54,8 +57,14 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
   }, [handleKeyDown, inputs, imageId]);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const x = e.nativeEvent.offsetX;
-    const y = e.nativeEvent.offsetY;
+    const x =
+      e.nativeEvent.offsetX + INPUT_WIDTH > e.currentTarget.offsetWidth
+        ? e.currentTarget.offsetWidth - INPUT_WIDTH
+        : e.nativeEvent.offsetX;
+    const y =
+      e.nativeEvent.offsetY + INPUT_HEIGHT > e.currentTarget.offsetHeight
+        ? e.currentTarget.offsetHeight - INPUT_HEIGHT
+        : e.nativeEvent.offsetY;
     const uniqueKey = generateKey();
 
     setNewNote({ x, y, text: '', key: uniqueKey });
