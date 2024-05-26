@@ -23,12 +23,11 @@ export const Carousel = (): JSX.Element => {
   const navigate = useNavigate();
 
   const { data, isLoading } = useInfinitePhotos(searchQuery);
-  const images = data?.pages[0].images ?? [];
+  const images = data?.pages.flatMap((el) => el.images) ?? [];
 
   const [searchParams, setSearchParams] = useSearchParams();
   const searchedId = searchParams.get('id');
-  const currentImageIndex =
-    images.findIndex((el) => el.id === searchedId) > 0 ? images.findIndex((el) => el.id === searchedId) : 0;
+  const currentImageIndex = images.findIndex((el) => el.id === searchedId);
 
   const scrollPos = currentImageIndex * SCROLL_STEP;
 
