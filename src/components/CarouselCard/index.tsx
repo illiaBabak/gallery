@@ -7,12 +7,14 @@ import { getStorageNotes } from 'src/utils/getStorageNotes';
 type Props = {
   imageId: string;
   imageUrl: string;
+  draggedNoteKey: string;
+  setDraggedNoteKey: React.Dispatch<React.SetStateAction<string>>;
 };
 
 const INPUT_WIDTH = 146;
 const INPUT_HEIGHT = 26;
 
-export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
+export const CarouselCard = ({ imageId, imageUrl, draggedNoteKey, setDraggedNoteKey }: Props): JSX.Element => {
   const [inputs, setInputs] = useState<Note[]>([]);
   const [focusedKey, setFocusedKey] = useState('');
   const [newNote, setNewNote] = useState<Note | null>(null);
@@ -65,6 +67,7 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
       e.nativeEvent.offsetY + INPUT_HEIGHT > e.currentTarget.offsetHeight
         ? e.currentTarget.offsetHeight - INPUT_HEIGHT
         : e.nativeEvent.offsetY;
+
     const uniqueKey = generateKey();
 
     setNewNote({ x, y, text: '', key: uniqueKey });
@@ -82,28 +85,69 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
   const handleInputBlur = () => setSelectedInputKey('');
 
   return (
-    <div className='carousel-card'>
-      <div className='img-wrapper'>
-        <PrismaZoom
-          scrollVelocity={0.3}
-          minZoom={1}
-          maxZoom={2}
-          doubleTouchMaxDelay={0}
-          onClick={(e) => {
-            handleClick(e);
-          }}
-        >
-          <img className='carousel-img' src={imageUrl} alt='carousel-image' />
+    <div
+      className='carousel-card'
+      onDragOver={(e) => e.preventDefault()}
+      onDrop={() => {
+        setDraggedNoteKey('');
+      }}
+    >
+      <div
+        className='img-wrapper'
+        onClick={handleClick}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.stopPropagation();
 
-          {newNote && (
+          const updatedNotes = inputs.map((note) =>
+            note.key === draggedNoteKey ? { ...note, x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY } : note
+          );
+
+          setInputs(updatedNotes);
+          setDraggedNoteKey('');
+        }}
+      >
+        <PrismaZoom scrollVelocity={0.3} minZoom={1} maxZoom={2} doubleTouchMaxDelay={0}>
+          <img className='carousel-img' src={imageUrl} alt='carousel-image' />
+        </PrismaZoom>
+
+        {newNote && (
+          <input
+            className='note-input'
+            key={`input-${newNote.key}`}
+            type='text'
+            style={{ position: 'absolute', left: newNote.x, top: newNote.y + 2 }}
+            value={newNote.text}
+            onChange={(e) => setNewNote((prev) => (prev ? { ...prev, text: e.currentTarget.value } : prev))}
+            onBlur={handleAddNew}
+            onKeyDown={(e) => {
+              setFocusedKey('');
+
+              if (e.key === 'Enter') e.currentTarget.blur();
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+            }}
+            autoFocus
+          />
+        )}
+
+        {inputs.map((el) =>
+          el.key === selectedInputKey ? (
             <input
               className='note-input'
-              key={`input-${newNote.key}`}
+              key={`input-${el.key}`}
               type='text'
-              style={{ position: 'absolute', left: newNote.x, top: newNote.y + 2 }}
-              value={newNote.text}
-              onChange={(e) => setNewNote((prev) => (prev ? { ...prev, text: e.currentTarget.value } : prev))}
-              onBlur={handleAddNew}
+              style={{ position: 'absolute', left: el.x, top: el.y + 2 }}
+              value={el.text}
+              onChange={(e) => {
+                const val = e.currentTarget.value;
+
+                setInputs((prevInputs) =>
+                  prevInputs.map((input) => (input.key === el.key ? { ...input, text: val } : input))
+                );
+              }}
+              onBlur={handleInputBlur}
               onKeyDown={(e) => {
                 setFocusedKey('');
 
@@ -114,56 +158,32 @@ export const CarouselCard = ({ imageId, imageUrl }: Props): JSX.Element => {
               }}
               autoFocus
             />
-          )}
+          ) : (
+            <p
+              key={`text-${el.key}`}
+              style={{ left: el.x, top: el.y }}
+              className={`note ${focusedKey === el.key ? 'focused' : ''} ${draggedNoteKey === el.key ? 'dragged-note' : ''}`}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
 
-          {inputs.map((el) =>
-            el.key === selectedInputKey ? (
-              <input
-                className='note-input'
-                key={`input-${el.key}`}
-                type='text'
-                style={{ position: 'absolute', left: el.x, top: el.y + 2 }}
-                value={el.text}
-                onChange={(e) => {
-                  const val = e.currentTarget.value;
+                setFocusedKey(el.key);
+                handleAddNew();
 
-                  setInputs((prevInputs) =>
-                    prevInputs.map((input) => (input.key === el.key ? { ...input, text: val } : input))
-                  );
-                }}
-                onBlur={handleInputBlur}
-                onKeyDown={(e) => {
+                if (el.key === focusedKey) {
+                  setSelectedInputKey(el.key);
                   setFocusedKey('');
-
-                  if (e.key === 'Enter') e.currentTarget.blur();
-                }}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}
-                autoFocus
-              />
-            ) : (
-              <p
-                key={`text-${el.key}`}
-                style={{ left: el.x, top: el.y }}
-                className={`note ${focusedKey === el.key ? 'focused' : ''}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-
-                  setFocusedKey(el.key);
-                  handleAddNew();
-
-                  if (el.key === focusedKey) {
-                    setSelectedInputKey(el.key);
-                    setFocusedKey('');
-                  }
-                }}
-              >
-                {el.text}
-              </p>
-            )
-          )}
-        </PrismaZoom>
+                }
+              }}
+              draggable
+              onDragStart={() => {
+                setDraggedNoteKey(el.key);
+              }}
+            >
+              {el.text}
+            </p>
+          )
+        )}
       </div>
     </div>
   );

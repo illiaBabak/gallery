@@ -81,3 +81,12 @@
     }
   }
 }
+
+.dragged-wrapper {
+  background-color: #234e7854;
+
+  .container-btn,
+  .close-carousel-btn {
+    opacity: 0;
+  }
+}

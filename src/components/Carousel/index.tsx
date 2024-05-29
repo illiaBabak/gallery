@@ -1,6 +1,6 @@
 import { useInfinitePhotos } from 'src/api/photos';
 import { CarouselCard } from '../CarouselCard';
-import { useContext } from 'react';
+import { useContext, useState } from 'react';
 import { GlobalContext } from 'src/root';
 import { Loader } from '../Loader';
 import { useSwipeable } from 'react-swipeable';
@@ -20,6 +20,7 @@ const SWIPE_OPTIONS = {
 
 export const Carousel = (): JSX.Element => {
   const { searchQuery } = useContext(GlobalContext);
+  const [draggedNoteKey, setDraggedNoteKey] = useState('');
   const navigate = useNavigate();
 
   const { data, isLoading } = useInfinitePhotos(searchQuery);
@@ -56,13 +57,15 @@ export const Carousel = (): JSX.Element => {
     <>
       {isLoading && <Loader />}
 
-      <div className='carousel-wrapper'>
+      <div className={`carousel-wrapper ${draggedNoteKey ? 'dragged-wrapper' : ''}`}>
         <div className='carousel' {...handlers} style={{ transform: `translateX(-${scrollPos}%)` }}>
           {images?.map((image, index) => (
             <CarouselCard
               imageId={image.id}
               imageUrl={image.urls.regular}
               key={`image-card-${image.created_at}-${index}`}
+              draggedNoteKey={draggedNoteKey}
+              setDraggedNoteKey={setDraggedNoteKey}
             />
           ))}
         </div>
