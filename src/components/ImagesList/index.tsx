@@ -28,9 +28,19 @@ export const ImagesList = (): JSX.Element => {
 
   return (
     <>
-      <div className='images-list'>
-        {images?.map((image, index) => <ImageCard image={image} key={`image-card-${image.created_at}-${index}`} />)}
-      </div>
+      {images?.length ? (
+        <div className='images-list'>
+          {images?.map((image, index) => <ImageCard image={image} key={`image-card-${image.created_at}-${index}`} />)}
+        </div>
+      ) : (
+        <div className='empty-list'>
+          <img
+            className='empty-icon'
+            src='https://t4.ftcdn.net/jpg/02/84/64/51/360_F_284645131_hE2W3bbPxFBkk2aNqNyiTgLiraaiAuDh.jpg'
+            alt='Image not found'
+          />
+        </div>
+      )}
 
       {isFetchingNextPage || isLoading ? <Loader /> : <div ref={handleIntersect} />}
     </>

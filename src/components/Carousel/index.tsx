@@ -28,7 +28,8 @@ export const Carousel = (): JSX.Element => {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const searchedId = searchParams.get('id');
-  const currentImageIndex = images.findIndex((el) => el.id === searchedId);
+  const currentImageIndex =
+    images.findIndex((el) => el.id === searchedId) < 0 ? 0 : images.findIndex((el) => el.id === searchedId);
 
   const scrollPos = currentImageIndex * SCROLL_STEP;
 
