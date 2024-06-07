@@ -34,6 +34,7 @@ export const App = (): JSX.Element => {
             <Route path='/*' element={<Navigate to='/error' />} />
             <Route
               path='/images'
+              index
               element={
                 <>
                   <Header />

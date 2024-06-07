@@ -4,7 +4,7 @@
   align-items: center;
   flex-direction: column;
   width: 100%;
-  height: calc(100vh);
+  height: 100vh;
   background-color: #3675b447;
   overflow: hidden;
   position: relative;
@@ -50,7 +50,6 @@
 
         .btn {
           filter: grayscale(70%);
-          cursor: not-allowed;
           pointer-events: none;
 
           &:hover {

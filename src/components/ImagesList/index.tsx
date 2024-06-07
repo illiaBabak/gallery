@@ -28,7 +28,7 @@ export const ImagesList = (): JSX.Element => {
 
   return (
     <>
-      {images?.length ? (
+      {images?.length || isLoading ? (
         <div className='images-list'>
           {images?.map((image, index) => <ImageCard image={image} key={`image-card-${image.created_at}-${index}`} />)}
         </div>

@@ -33,17 +33,17 @@ export const Carousel = (): JSX.Element => {
 
   const scrollPos = currentImageIndex * SCROLL_STEP;
 
-  const prevDisabled = scrollPos === 0;
-  const nextDisabled = scrollPos === (images.length - 1) * SCROLL_STEP;
+  const isPrevDisabled = currentImageIndex === 0;
+  const isNextDisabled = currentImageIndex === images.length - 1;
 
   const handlers = useSwipeable({
     onSwipedLeft: () => {
-      if (nextDisabled) return;
+      if (isNextDisabled) return;
 
       handleNextClick();
     },
     onSwipedRight: () => {
-      if (prevDisabled) return;
+      if (isPrevDisabled) return;
 
       handlePrevClick();
     },
@@ -58,7 +58,11 @@ export const Carousel = (): JSX.Element => {
     <>
       {isLoading && <Loader />}
 
-      <div className={`carousel-wrapper ${draggedNoteKey ? 'dragged-wrapper' : ''}`}>
+      <div
+        className={`carousel-wrapper ${draggedNoteKey ? 'dragged-wrapper' : ''}`}
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={() => setDraggedNoteKey('')}
+      >
         <div className='carousel' {...handlers} style={{ transform: `translateX(-${scrollPos}%)` }}>
           {images?.map((image, index) => (
             <CarouselCard
@@ -72,13 +76,13 @@ export const Carousel = (): JSX.Element => {
         </div>
 
         <div className='container-btn'>
-          <div className={`nav-btn-wrapper ${prevDisabled ? 'disabled-btn' : ''}`}>
+          <div className={`nav-btn-wrapper ${isPrevDisabled ? 'disabled-btn' : ''}`}>
             <div className='btn' onClick={handlePrevClick}>
               Prev
             </div>
           </div>
 
-          <div className={`nav-btn-wrapper ${nextDisabled ? 'disabled-btn' : ''}`}>
+          <div className={`nav-btn-wrapper ${isNextDisabled ? 'disabled-btn' : ''}`}>
             <div className='btn' onClick={handleNextClick}>
               Next
             </div>

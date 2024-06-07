@@ -3,9 +3,10 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  width: calc(100% - 48px);
+  width: 100%;
   height: 95px;
   padding: 0 24px 0 24px;
+  box-sizing: border-box;
   background-color: #3e8ede;
   color: white;
 

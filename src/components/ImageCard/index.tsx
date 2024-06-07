@@ -1,4 +1,4 @@
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ImageType } from 'src/types/types';
 import { capitalize } from 'src/utils/capitalize';
 import { parseDate } from 'src/utils/parseDate';
@@ -8,13 +8,9 @@ type Props = {
 };
 
 export const ImageCard = ({ image }: Props): JSX.Element => {
-  const [, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const handleClick = () => {
-    setSearchParams({ id: image.id });
-    navigate(`/carousel?id=${image.id}`);
-  };
+  const handleClick = () => navigate({ pathname: '/carousel', search: `?id=${image.id}` });
 
   return (
     <div className='image-card' onClick={handleClick}>

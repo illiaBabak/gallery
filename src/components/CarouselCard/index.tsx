@@ -1,8 +1,10 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PrismaZoom from 'react-prismazoom';
+import { useNotesAutoSave } from 'src/hooks/useNotesAutoSave';
 import { Note } from 'src/types/types';
 import { generateKey } from 'src/utils/generateKey';
 import { getStorageNotes } from 'src/utils/getStorageNotes';
+import { NoteInput } from './components/NoteInput';
 
 type Props = {
   imageId: string;
@@ -11,14 +13,29 @@ type Props = {
   setDraggedNoteKey: React.Dispatch<React.SetStateAction<string>>;
 };
 
-const INPUT_WIDTH = 146;
-const INPUT_HEIGHT = 26;
+const getCurrentCoords = (
+  e: React.MouseEvent<HTMLDivElement>,
+  inputWidth: number,
+  inputHeight: number
+): { x: number; y: number } => {
+  const x =
+    e.nativeEvent.offsetX + inputWidth > e.currentTarget.offsetWidth
+      ? e.currentTarget.offsetWidth - inputWidth
+      : e.nativeEvent.offsetX;
+  const y =
+    e.nativeEvent.offsetY + inputHeight > e.currentTarget.offsetHeight
+      ? e.currentTarget.offsetHeight - inputHeight
+      : e.nativeEvent.offsetY;
+
+  return { x, y };
+};
 
 export const CarouselCard = ({ imageId, imageUrl, draggedNoteKey, setDraggedNoteKey }: Props): JSX.Element => {
   const [inputs, setInputs] = useState<Note[]>([]);
   const [focusedKey, setFocusedKey] = useState('');
   const [newNote, setNewNote] = useState<Note | null>(null);
   const [selectedInputKey, setSelectedInputKey] = useState('');
+  const inputEl = useRef<HTMLInputElement | null>(null);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -30,6 +47,8 @@ export const CarouselCard = ({ imageId, imageUrl, draggedNoteKey, setDraggedNote
     [focusedKey]
   );
 
+  useNotesAutoSave({ imageId, inputs });
+
   useEffect(() => {
     const storageData = getStorageNotes();
     const defaultData = storageData.find((note) => note.id === imageId)?.notes ?? [];
@@ -40,34 +59,17 @@ export const CarouselCard = ({ imageId, imageUrl, draggedNoteKey, setDraggedNote
   useEffect(() => {
     document.addEventListener('keydown', handleKeyDown);
 
-    const timerId = setInterval(() => {
-      const prevNotes = getStorageNotes();
-
-      const isExistImg = !!prevNotes.find((el) => el.id === imageId);
-      const updatedNotes = prevNotes.map((note) => (note.id === imageId ? { ...note, notes: inputs } : note));
-
-      localStorage.setItem(
-        'notes',
-        JSON.stringify(isExistImg ? updatedNotes : [...prevNotes, { id: imageId, notes: inputs }])
-      );
-    }, 5000);
-
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      clearInterval(timerId);
     };
-  }, [handleKeyDown, inputs, imageId]);
+  }, [handleKeyDown]);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const x =
-      e.nativeEvent.offsetX + INPUT_WIDTH > e.currentTarget.offsetWidth
-        ? e.currentTarget.offsetWidth - INPUT_WIDTH
-        : e.nativeEvent.offsetX;
-    const y =
-      e.nativeEvent.offsetY + INPUT_HEIGHT > e.currentTarget.offsetHeight
-        ? e.currentTarget.offsetHeight - INPUT_HEIGHT
-        : e.nativeEvent.offsetY;
-
+    const { x, y } = getCurrentCoords(
+      e,
+      inputEl.current?.getBoundingClientRect().width ?? 1,
+      inputEl.current?.getBoundingClientRect().height ?? 1
+    );
     const uniqueKey = generateKey();
 
     setNewNote({ x, y, text: '', key: uniqueKey });
@@ -85,13 +87,7 @@ export const CarouselCard = ({ imageId, imageUrl, draggedNoteKey, setDraggedNote
   const handleInputBlur = () => setSelectedInputKey('');
 
   return (
-    <div
-      className='carousel-card'
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={() => {
-        setDraggedNoteKey('');
-      }}
-    >
+    <div className='carousel-card'>
       <div
         className='img-wrapper'
         onClick={handleClick}
@@ -112,12 +108,8 @@ export const CarouselCard = ({ imageId, imageUrl, draggedNoteKey, setDraggedNote
         </PrismaZoom>
 
         {newNote && (
-          <input
-            className='note-input'
-            key={`input-${newNote.key}`}
-            type='text'
-            style={{ position: 'absolute', left: newNote.x, top: newNote.y + 2 }}
-            value={newNote.text}
+          <NoteInput
+            note={newNote}
             onChange={(e) => setNewNote((prev) => (prev ? { ...prev, text: e.currentTarget.value } : prev))}
             onBlur={handleAddNew}
             onKeyDown={(e) => {
@@ -125,21 +117,13 @@ export const CarouselCard = ({ imageId, imageUrl, draggedNoteKey, setDraggedNote
 
               if (e.key === 'Enter') e.currentTarget.blur();
             }}
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            autoFocus
           />
         )}
 
         {inputs.map((el) =>
           el.key === selectedInputKey ? (
-            <input
-              className='note-input'
-              key={`input-${el.key}`}
-              type='text'
-              style={{ position: 'absolute', left: el.x, top: el.y + 2 }}
-              value={el.text}
+            <NoteInput
+              note={el}
               onChange={(e) => {
                 const val = e.currentTarget.value;
 
@@ -153,10 +137,6 @@ export const CarouselCard = ({ imageId, imageUrl, draggedNoteKey, setDraggedNote
 
                 if (e.key === 'Enter') e.currentTarget.blur();
               }}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
-              autoFocus
             />
           ) : (
             <p
@@ -167,23 +147,19 @@ export const CarouselCard = ({ imageId, imageUrl, draggedNoteKey, setDraggedNote
                 e.stopPropagation();
                 e.preventDefault();
 
-                setFocusedKey(el.key);
-                handleAddNew();
-
                 if (el.key === focusedKey) {
                   setSelectedInputKey(el.key);
                   setFocusedKey('');
-                }
+                } else setFocusedKey(el.key);
               }}
               draggable
-              onDragStart={() => {
-                setDraggedNoteKey(el.key);
-              }}
+              onDragStart={() => setDraggedNoteKey(el.key)}
             >
               {el.text}
             </p>
           )
         )}
+        <input className='note-input' ref={inputEl} style={{ visibility: 'hidden', position: 'absolute' }} />
       </div>
     </div>
   );
