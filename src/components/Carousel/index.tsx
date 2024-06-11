@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Loader } from '../Loader';
 import { useSwipeable } from 'react-swipeable';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { SavedAlert } from '../SavedAlert';
 
 const SCROLL_STEP = 100;
 
@@ -20,6 +21,7 @@ const SWIPE_OPTIONS = {
 export const Carousel = (): JSX.Element => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [draggedNoteKey, setDraggedNoteKey] = useState('');
+  const [shouldShowSavedIcon, setShouldShowSavedIcon] = useState(false);
   const navigate = useNavigate();
 
   const searchedImages = searchParams.get('query') ?? '';
@@ -70,6 +72,7 @@ export const Carousel = (): JSX.Element => {
   return (
     <>
       {isLoading && <Loader />}
+      {shouldShowSavedIcon && <SavedAlert setShouldShowSavedIcon={setShouldShowSavedIcon} />}
 
       <div
         className={`carousel-wrapper ${draggedNoteKey ? 'dragged-wrapper' : ''}`}
@@ -84,6 +87,7 @@ export const Carousel = (): JSX.Element => {
               key={`image-card-${image.created_at}-${index}`}
               draggedNoteKey={draggedNoteKey}
               setDraggedNoteKey={setDraggedNoteKey}
+              setShouldShowSavedIcon={setShouldShowSavedIcon}
             />
           ))}
         </div>

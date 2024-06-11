@@ -11,6 +11,7 @@ type Props = {
   imageUrl: string;
   draggedNoteKey: string;
   setDraggedNoteKey: React.Dispatch<React.SetStateAction<string>>;
+  setShouldShowSavedIcon: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 const getCurrentCoords = (
@@ -30,11 +31,18 @@ const getCurrentCoords = (
   return { x, y };
 };
 
-export const CarouselCard = ({ imageId, imageUrl, draggedNoteKey, setDraggedNoteKey }: Props): JSX.Element => {
+export const CarouselCard = ({
+  imageId,
+  imageUrl,
+  draggedNoteKey,
+  setDraggedNoteKey,
+  setShouldShowSavedIcon,
+}: Props): JSX.Element => {
   const [inputs, setInputs] = useState<Note[]>([]);
   const [focusedKey, setFocusedKey] = useState('');
   const [newNote, setNewNote] = useState<Note | null>(null);
   const [selectedInputKey, setSelectedInputKey] = useState('');
+
   const inputEl = useRef<HTMLInputElement | null>(null);
 
   const handleKeyDown = useCallback(
@@ -47,7 +55,7 @@ export const CarouselCard = ({ imageId, imageUrl, draggedNoteKey, setDraggedNote
     [focusedKey]
   );
 
-  useNotesAutoSave({ imageId, inputs });
+  useNotesAutoSave({ imageId, inputs, setShouldShowSavedIcon });
 
   useEffect(() => {
     const storageData = getStorageNotes();

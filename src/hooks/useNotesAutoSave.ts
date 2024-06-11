@@ -5,11 +5,12 @@ import { getStorageNotes } from 'src/utils/getStorageNotes';
 type Props = {
   imageId: string;
   inputs: Note[];
+  setShouldShowSavedIcon: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const TIMER_DELAY = 10000;
+const TIMER_DELAY = 5000;
 
-export const useNotesAutoSave = ({ imageId, inputs }: Props): void => {
+export const useNotesAutoSave = ({ imageId, inputs, setShouldShowSavedIcon }: Props): void => {
   useEffect(() => {
     const timerId = setInterval(() => {
       const prevNotes = getStorageNotes();
@@ -21,8 +22,10 @@ export const useNotesAutoSave = ({ imageId, inputs }: Props): void => {
         : [...prevNotes, { id: imageId, notes: inputs }];
 
       localStorage.setItem('notes', JSON.stringify(updatedNotes));
+
+      setShouldShowSavedIcon(true);
     }, TIMER_DELAY);
 
     return () => clearInterval(timerId);
-  }, [inputs, imageId]);
+  }, [inputs, imageId, setShouldShowSavedIcon]);
 };
