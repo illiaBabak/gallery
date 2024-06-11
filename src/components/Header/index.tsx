@@ -1,9 +1,7 @@
-import { useContext, useState } from 'react';
-import { GlobalContext } from 'src/root';
+import { useSearchParams } from 'react-router-dom';
 
 export const Header = (): JSX.Element => {
-  const { setSearchQuery } = useContext(GlobalContext);
-  const [searchVal, setSearchVal] = useState('');
+  const [, setSearchParams] = useSearchParams();
 
   return (
     <div className='header'>
@@ -16,15 +14,26 @@ export const Header = (): JSX.Element => {
             type='text'
             className='search-input'
             placeholder='Search here...'
-            value={searchVal}
-            onChange={(e) => setSearchVal(e.currentTarget.value)}
-            onBlur={() => setSearchQuery(searchVal)}
+            onBlur={(e) => {
+              const trimmedVal = e.currentTarget.value.trim();
+
+              if (!trimmedVal) {
+                setSearchParams((prev) => {
+                  prev.delete('query');
+                  return prev;
+                });
+
+                return;
+              }
+
+              setSearchParams({ query: trimmedVal });
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') e.currentTarget.blur();
             }}
           />
         </div>
-        <div className='clear-btn' onClick={() => setSearchVal('')}>
+        <div className='clear-btn' onClick={() => setSearchParams({ query: '' })}>
           x
         </div>
       </div>

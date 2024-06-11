@@ -1,8 +1,8 @@
 import { useInfinitePhotos } from 'src/api/photos';
 import { ImageCard } from '../ImageCard';
-import { useContext, useRef } from 'react';
+import { useRef } from 'react';
 import { Loader } from '../Loader';
-import { GlobalContext } from 'src/root';
+import { useSearchParams } from 'react-router-dom';
 
 const OBSERVER_OPTIONS = {
   root: null,
@@ -11,9 +11,9 @@ const OBSERVER_OPTIONS = {
 };
 
 export const ImagesList = (): JSX.Element => {
-  const { searchQuery } = useContext(GlobalContext);
+  const [searchParams] = useSearchParams();
   const observer = useRef<IntersectionObserver | null>(null);
-  const { data, isFetchingNextPage, fetchNextPage, isLoading } = useInfinitePhotos(searchQuery);
+  const { data, isFetchingNextPage, fetchNextPage, isLoading } = useInfinitePhotos(searchParams.get('query') ?? '');
   const images = data?.pages.flatMap((el) => el.images);
 
   const handleIntersect = (el: HTMLElement | null) => {

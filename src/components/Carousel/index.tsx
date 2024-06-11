@@ -1,7 +1,6 @@
 import { useInfinitePhotos } from 'src/api/photos';
 import { CarouselCard } from '../CarouselCard';
-import { useContext, useState } from 'react';
-import { GlobalContext } from 'src/root';
+import { useState } from 'react';
 import { Loader } from '../Loader';
 import { useSwipeable } from 'react-swipeable';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -19,17 +18,17 @@ const SWIPE_OPTIONS = {
 };
 
 export const Carousel = (): JSX.Element => {
-  const { searchQuery } = useContext(GlobalContext);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [draggedNoteKey, setDraggedNoteKey] = useState('');
   const navigate = useNavigate();
 
-  const { data, isLoading } = useInfinitePhotos(searchQuery);
+  const searchedImages = searchParams.get('query') ?? '';
+  const searchedId = searchParams.get('id');
+
+  const { data, isLoading } = useInfinitePhotos(searchedImages);
   const images = data?.pages.flatMap((el) => el.images) ?? [];
 
-  const [searchParams, setSearchParams] = useSearchParams();
-  const searchedId = searchParams.get('id');
-  const currentImageIndex =
-    images.findIndex((el) => el.id === searchedId) < 0 ? 0 : images.findIndex((el) => el.id === searchedId);
+  const currentImageIndex = images.findIndex((el) => el.id === searchedId);
 
   const scrollPos = currentImageIndex * SCROLL_STEP;
 
@@ -50,9 +49,23 @@ export const Carousel = (): JSX.Element => {
     ...SWIPE_OPTIONS,
   });
 
-  const handlePrevClick = () => setSearchParams({ id: images[currentImageIndex - 1].id });
+  const handlePrevClick = () => {
+    if (searchedImages) {
+      setSearchParams({ id: images[currentImageIndex - 1].id, query: searchedImages });
+      return;
+    }
 
-  const handleNextClick = () => setSearchParams({ id: images[currentImageIndex + 1].id });
+    setSearchParams({ id: images[currentImageIndex - 1].id });
+  };
+
+  const handleNextClick = () => {
+    if (searchedImages) {
+      setSearchParams({ id: images[currentImageIndex + 1].id, query: searchedImages });
+      return;
+    }
+
+    setSearchParams({ id: images[currentImageIndex + 1].id });
+  };
 
   return (
     <>
