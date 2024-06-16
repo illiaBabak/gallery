@@ -26,6 +26,10 @@
       object-fit: contain;
     }
 
+    .hidden {
+      visibility: hidden;
+    }
+
     .note {
       position: absolute;
       color: #3e8ede;

@@ -15,18 +15,15 @@ type Props = {
 };
 
 const getCurrentCoords = (
-  e: React.MouseEvent<HTMLDivElement>,
-  inputWidth: number,
-  inputHeight: number
+  { currentTarget, nativeEvent }: React.MouseEvent<HTMLDivElement>,
+  input: React.MutableRefObject<HTMLInputElement | null>
 ): { x: number; y: number } => {
-  const x =
-    e.nativeEvent.offsetX + inputWidth > e.currentTarget.offsetWidth
-      ? e.currentTarget.offsetWidth - inputWidth
-      : e.nativeEvent.offsetX;
-  const y =
-    e.nativeEvent.offsetY + inputHeight > e.currentTarget.offsetHeight
-      ? e.currentTarget.offsetHeight - inputHeight
-      : e.nativeEvent.offsetY;
+  const { width = 1, height = 1 } = input.current?.getBoundingClientRect() ?? {};
+  const { offsetHeight, offsetWidth } = currentTarget;
+  const { offsetX, offsetY } = nativeEvent;
+
+  const x = offsetX + width > offsetWidth ? offsetWidth - width : offsetX;
+  const y = offsetY + height > offsetHeight ? offsetHeight - height : offsetY;
 
   return { x, y };
 };
@@ -73,11 +70,7 @@ export const CarouselCard = ({
   }, [handleKeyDown]);
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    const { x, y } = getCurrentCoords(
-      e,
-      inputEl.current?.getBoundingClientRect().width ?? 1,
-      inputEl.current?.getBoundingClientRect().height ?? 1
-    );
+    const { x, y } = getCurrentCoords(e, inputEl);
     const uniqueKey = generateKey();
 
     setNewNote({ x, y, text: '', key: uniqueKey });
@@ -103,11 +96,14 @@ export const CarouselCard = ({
         onDrop={(e) => {
           e.stopPropagation();
 
-          const updatedNotes = inputs.map((note) =>
-            note.key === draggedNoteKey ? { ...note, x: e.nativeEvent.offsetX, y: e.nativeEvent.offsetY } : note
+          const {
+            nativeEvent: { offsetX, offsetY },
+          } = e;
+
+          setInputs((prev) =>
+            prev.map((note) => (note.key === draggedNoteKey ? { ...note, x: offsetX, y: offsetY } : note))
           );
 
-          setInputs(updatedNotes);
           setDraggedNoteKey('');
         }}
       >
@@ -115,35 +111,34 @@ export const CarouselCard = ({
           <img className='carousel-img' src={imageUrl} alt='carousel-image' />
         </PrismaZoom>
 
-        {newNote && (
-          <NoteInput
-            note={newNote}
-            onChange={(e) => setNewNote((prev) => (prev ? { ...prev, text: e.currentTarget.value } : prev))}
-            onBlur={handleAddNew}
-            onKeyDown={(e) => {
-              setFocusedKey('');
+        <NoteInput
+          key={newNote ? 'active' : ''}
+          note={newNote}
+          ref={inputEl}
+          onChange={({ currentTarget: { value } }) => setNewNote((prev) => (prev ? { ...prev, text: value } : prev))}
+          onBlur={handleAddNew}
+          onKeyDown={({ key, currentTarget }) => {
+            setFocusedKey('');
 
-              if (e.key === 'Enter') e.currentTarget.blur();
-            }}
-          />
-        )}
+            if (key === 'Enter') currentTarget.blur();
+          }}
+          className={newNote ? '' : 'hidden'}
+        />
 
         {inputs.map((el) =>
           el.key === selectedInputKey ? (
             <NoteInput
               note={el}
-              onChange={(e) => {
-                const val = e.currentTarget.value;
-
+              onChange={({ currentTarget: { value } }) => {
                 setInputs((prevInputs) =>
-                  prevInputs.map((input) => (input.key === el.key ? { ...input, text: val } : input))
+                  prevInputs.map((input) => (input.key === el.key ? { ...input, text: value } : input))
                 );
               }}
               onBlur={handleInputBlur}
-              onKeyDown={(e) => {
+              onKeyDown={({ key, currentTarget }) => {
                 setFocusedKey('');
 
-                if (e.key === 'Enter') e.currentTarget.blur();
+                if (key === 'Enter') currentTarget.blur();
               }}
             />
           ) : (
@@ -158,7 +153,10 @@ export const CarouselCard = ({
                 if (el.key === focusedKey) {
                   setSelectedInputKey(el.key);
                   setFocusedKey('');
-                } else setFocusedKey(el.key);
+                  return;
+                }
+
+                setFocusedKey(el.key);
               }}
               draggable
               onDragStart={() => setDraggedNoteKey(el.key)}
@@ -167,7 +165,6 @@ export const CarouselCard = ({
             </p>
           )
         )}
-        <input className='note-input' ref={inputEl} style={{ visibility: 'hidden', position: 'absolute' }} />
       </div>
     </div>
   );

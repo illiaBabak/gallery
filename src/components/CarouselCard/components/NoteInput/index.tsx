@@ -1,25 +1,27 @@
+import { forwardRef } from 'react';
 import { Note } from 'src/types/types';
 
 type Props = {
-  note: Note;
+  note: Note | null;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onBlur: () => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  className?: string;
 };
 
-export const NoteInput = ({ note, onChange, onBlur, onKeyDown }: Props): JSX.Element => {
-  return (
+export const NoteInput = forwardRef<HTMLInputElement, Props>(
+  ({ note, onChange, onBlur, onKeyDown, className = '' }, ref): JSX.Element => (
     <input
-      className='note-input'
-      key={`input-${note.key}`}
+      ref={ref}
+      className={`note-input ${className}`}
       type='text'
-      style={{ position: 'absolute', left: note.x, top: note.y }}
-      value={note.text}
+      style={{ left: note?.x, top: note?.y }}
+      value={note?.text}
       onChange={onChange}
       onBlur={onBlur}
       onKeyDown={onKeyDown}
       onClick={(e) => e.stopPropagation()}
       autoFocus
     />
-  );
-};
+  )
+);

@@ -6,13 +6,16 @@ type ResponseType = {
   images: ImageType[];
 };
 
+const API_URL = 'https://api.unsplash.com/photos';
+const API_URL_WITH_SEARCH = 'https://api.unsplash.com/search/photos';
+
 const getPhotos = async (
   pageNumber: number,
   query: string
 ): Promise<(ResponseType & { pageNumber: number }) | undefined> => {
   try {
     const response = await fetch(
-      `${query ? import.meta.env.VITE_API_URL_SEARCH : import.meta.env.VITE_API_URL}?page=${pageNumber}${query ? `&query=${query}` : ''}&client_id=${import.meta.env.VITE_API_KEY}`
+      `${query ? API_URL_WITH_SEARCH : API_URL}?page=${pageNumber}${query ? `&query=${query}` : ''}&client_id=${import.meta.env.VITE_API_KEY}`
     );
     const responseData: unknown = await response.json();
 

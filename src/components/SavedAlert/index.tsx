@@ -9,11 +9,9 @@ export const SavedAlert = ({ setShouldShowSavedIcon }: Props): JSX.Element => {
     <div
       className='saved-alert'
       onAnimationEnd={() => {
-        const timeoutId = setTimeout(() => {
+        setTimeout(() => {
           setShouldShowSavedIcon(false);
         }, TIMEOUT_DELAY);
-
-        return () => clearTimeout(timeoutId);
       }}
     >
       <img

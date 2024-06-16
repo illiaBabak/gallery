@@ -41,32 +41,23 @@ export const Carousel = (): JSX.Element => {
     onSwipedLeft: () => {
       if (isNextDisabled) return;
 
-      handleNextClick();
+      handleClick(currentImageIndex + 1);
     },
     onSwipedRight: () => {
       if (isPrevDisabled) return;
 
-      handlePrevClick();
+      handleClick(currentImageIndex - 1);
     },
     ...SWIPE_OPTIONS,
   });
 
-  const handlePrevClick = () => {
-    if (searchedImages) {
-      setSearchParams({ id: images[currentImageIndex - 1].id, query: searchedImages });
-      return;
-    }
+  const handleClick = (index: number) => {
+    const imageId = images[index].id;
 
-    setSearchParams({ id: images[currentImageIndex - 1].id });
-  };
-
-  const handleNextClick = () => {
-    if (searchedImages) {
-      setSearchParams({ id: images[currentImageIndex + 1].id, query: searchedImages });
-      return;
-    }
-
-    setSearchParams({ id: images[currentImageIndex + 1].id });
+    setSearchParams((prev) => {
+      prev.set('id', imageId);
+      return prev;
+    });
   };
 
   return (
@@ -94,13 +85,13 @@ export const Carousel = (): JSX.Element => {
 
         <div className='container-btn'>
           <div className={`nav-btn-wrapper ${isPrevDisabled ? 'disabled-btn' : ''}`}>
-            <div className='btn' onClick={handlePrevClick}>
+            <div className='btn' onClick={() => handleClick(currentImageIndex - 1)}>
               Prev
             </div>
           </div>
 
           <div className={`nav-btn-wrapper ${isNextDisabled ? 'disabled-btn' : ''}`}>
-            <div className='btn' onClick={handleNextClick}>
+            <div className='btn' onClick={() => handleClick(currentImageIndex + 1)}>
               Next
             </div>
           </div>
