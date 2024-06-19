@@ -28,6 +28,24 @@ const getCurrentCoords = (
   return { x, y };
 };
 
+const getDroppedCoords = (
+  { nativeEvent, currentTarget }: React.MouseEvent<HTMLDivElement>,
+  draggableText: React.MutableRefObject<HTMLParagraphElement | null>
+): { x: number; y: number } => {
+  const { offsetHeight, offsetWidth } = currentTarget;
+  const { offsetX, offsetY } = nativeEvent;
+
+  const { width = 1, height = 1 } = draggableText.current?.getBoundingClientRect() ?? {};
+
+  const beyondRight = offsetX + width > offsetWidth;
+  const beyondBottom = offsetY + height > offsetHeight;
+
+  const x = beyondRight ? offsetWidth - width : offsetX;
+  const y = beyondBottom ? offsetHeight - height : offsetY;
+
+  return { x, y };
+};
+
 export const CarouselCard = ({
   imageId,
   imageUrl,
@@ -41,6 +59,7 @@ export const CarouselCard = ({
   const [selectedInputKey, setSelectedInputKey] = useState('');
 
   const inputEl = useRef<HTMLInputElement | null>(null);
+  const draggableText = useRef<HTMLParagraphElement | null>(null);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -87,26 +106,20 @@ export const CarouselCard = ({
 
   const handleInputBlur = () => setSelectedInputKey('');
 
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+
+    const { x, y } = getDroppedCoords(e, draggableText);
+
+    setInputs((prev) => prev.map((note) => (note.key === draggedNoteKey ? { ...note, x, y } : note)));
+
+    setDraggedNoteKey('');
+    draggableText.current = null;
+  };
+
   return (
     <div className='carousel-card'>
-      <div
-        className='img-wrapper'
-        onClick={handleClick}
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.stopPropagation();
-
-          const {
-            nativeEvent: { offsetX, offsetY },
-          } = e;
-
-          setInputs((prev) =>
-            prev.map((note) => (note.key === draggedNoteKey ? { ...note, x: offsetX, y: offsetY } : note))
-          );
-
-          setDraggedNoteKey('');
-        }}
-      >
+      <div className='img-wrapper' onClick={handleClick} onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
         <PrismaZoom scrollVelocity={0.3} minZoom={1} maxZoom={2} doubleTouchMaxDelay={0}>
           <img className='carousel-img' src={imageUrl} alt='carousel-image' />
         </PrismaZoom>
@@ -159,7 +172,12 @@ export const CarouselCard = ({
                 setFocusedKey(el.key);
               }}
               draggable
-              onDragStart={() => setDraggedNoteKey(el.key)}
+              onDragStart={(e) => {
+                setDraggedNoteKey(el.key);
+
+                draggableText.current = e.currentTarget;
+              }}
+              onDragEnd={() => setDraggedNoteKey('')}
             >
               {el.text}
             </p>
