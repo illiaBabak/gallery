@@ -10,6 +10,8 @@ This project was written in React using TypeScript, Vite and React Query
 <img src="https://static-00.iconduck.com/assets.00/typescript-icon-icon-1024x1024-vh3pfez8.png" alt="TypeScript" width="75" height="75" style="object-fit: cover;">
 <img src="https://cdn-icons-png.flaticon.com/512/5968/5968358.png" alt="SCSS" width="75" height="75" style="object-fit: cover;">
 
+During 22.04.2024-20.06.2024
+
 # Gallery
 
 This web application is written to learn how to work with react-swipeable and react-prismazoom using images api
